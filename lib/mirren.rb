@@ -1,4 +1,3 @@
-require 'mirren/version'
 require 'dry-struct'
 
 module Types
@@ -26,3 +25,11 @@ module Mirren
 
   BaseStruct = Dry.Struct { transform_keys(&:to_sym) }
 end
+
+require 'mirren/version'
+require 'mirren/api'
+require 'mirren/info'
+require 'mirren/accounts'
+require 'mirren/rigs'
+require 'mirren/rentals'
+require 'mirren/client'
