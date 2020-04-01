@@ -5,7 +5,7 @@ module Types
   NilOrString = Types::Nil | Types::String
   FloatString = Types.Constructor(Float) { |v| v.to_f }
   IntString = Types.Constructor(Integer) { |v| v.to_i }
-  YesBool = Types.Constructor(Bool) { |v| v.downcase == 'yes' ? true : false }
+  YesBool = Types.Constructor(Bool) { |v| v.downcase == 'yes' }
   HashTypes = Types::String.enum('hash', 'kh', 'mh', 'gh', 'th')
 end
 

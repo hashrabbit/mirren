@@ -7,7 +7,7 @@ module Mirren
 
       def fetch_account
         acct = get('/account')
-        acct['settings'].tap {|h| h['two_factor'] = h.delete('2factor_auth') }
+        acct['settings'].tap { |h| h['two_factor'] = h.delete('2factor_auth') }
         Account.new(acct)
       end
 
@@ -16,7 +16,7 @@ module Mirren
         Balance.new(fields)
       end
 
-      def fetch_pools(algo: nil)
+      def fetch_pools
         get('/account/pool').map { |e| Pool.new(e) }
       end
 
