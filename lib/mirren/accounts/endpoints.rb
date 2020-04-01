@@ -26,7 +26,7 @@ module Mirren
       end
 
       def create_pool(params: nil)
-        raise ParamsError.new(:PoolParams) unless params.is_a?(PoolParams)
+        valid_params!(params, PoolParams)
 
         put('/account/pool', params: params.to_h)
       end
