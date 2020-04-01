@@ -6,7 +6,8 @@ module Mirren
       include Api
 
       def fetch_whoami
-        Whoami.new(get('/whoami'))
+        fields = get('/whoami')
+        Whoami.new(fields)
       end
 
       def fetch_algos
@@ -14,7 +15,8 @@ module Mirren
       end
 
       def fetch_algo(name:)
-        Algorithm.new(get("/info/algos/#{name}"))
+        fields = get("/info/algos/#{name}")
+        Algorithm.new(fields)
       end
     end
   end

@@ -6,7 +6,7 @@ module Mirren
       include Api
 
       def fetch_rigs(params: nil)
-        raise ParamsError.new(:RigParams) unless params.is_a?(Params)
+        valid_params!(params, Params)
 
         fields = get('/rig', params: params.to_h)
         Found.new(fields)
