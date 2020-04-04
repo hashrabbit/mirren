@@ -25,7 +25,7 @@ module Mirren
         valid_params!(params, Params)
 
         fields = put('/rental', params: params.to_h)
-          Rental.new(fields)
+        Rental.new(fields)
       end
 
       def add_rental_pool(id:, params: nil)
