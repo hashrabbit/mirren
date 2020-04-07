@@ -6,44 +6,74 @@ module Mirren
       include Api
 
       def fetch_account
-        acct = get('/account')
-        acct['settings'].tap { |h| h['two_factor'] = h.delete('2factor_auth') }
-        Account.new(acct)
+        get('/account').bind { |acct|
+          acct['settings'].tap { |h| h['two_factor'] = h.delete('2factor_auth') }
+          Account.try(acct).to_monad
+        }
+      end
+
+      def fetch_account!
+        fetch_account.value!
       end
 
       def fetch_account_balance
-        fields = get('/account/balance')
-        Balance.new(fields)
+        fields = get('/account/balance').bind { Balance.try(_1).to_monad }
+      end
+
+      def fetch_account_balance!
+        fetch_account_balance.value!
       end
 
       def fetch_pools
-        get('/account/pool').map { |e| Pool.new(e) }
+        result_list = get('/account/pool')
+        Monads.result_list_bind(result_list) { Pool.try(_1).to_monad }
+      end
+
+      def fetch_pools!
+        fetch_pools.value!
       end
 
       def fetch_pool(id:)
-        fields = get("/account/pool/#{id}")
-        Pool.new(fields)
+        get("/account/pool/#{id}").bind { Pool.try(_1).to_monad }
+      end
+
+      def fetch_pool!(*args)
+        fetch_pool(*args).value!
       end
 
       def create_pool(params: nil)
-        valid_params!(params, PoolParams)
+        validate_params(params, PoolParams).bind do |params|
+          put('/account/pool', params: params.to_h)
+        end
+      end
 
-        put('/account/pool', params: params.to_h)
+      def create_pool!(*args)
+        create_pool(*args).value!
       end
 
       def delete_pool(id:)
         delete("/account/pool/#{id}")
       end
 
+      def delete_pool!(*args)
+        delete_pool(*args).value!
+      end
+
       def fetch_profiles(algo: nil)
-        get('/account/profile', params: { algo: algo }).map do |fields|
-          Profile.new(fields)
-        end
+        result_list = get('/account/profile', params: { algo: algo })
+        Monads.result_list_bind(result_list) { Profile.try(_1).to_monad }
+      end
+
+      def fetch_profiles!(*args)
+        fetch_profiles(*args).value!
       end
 
       def fetch_profile(id:)
-        fields = get("/account/profile/#{id}")
-        Profile.new(fields)
+        get("/account/profile/#{id}").bind { Profile.try(_1).to_monad }
+      end
+
+      def fetch_profile!(*args)
+        fetch_profile(*args).value!
       end
     end
   end

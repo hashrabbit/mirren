@@ -5,7 +5,7 @@ module Mirren
     class Auth
       def initialize(message)
         @message = message
-        @secret = ENV['API_SECRET']
+        @secret = ENV['API_SECRET'] || ""
       end
 
       def call

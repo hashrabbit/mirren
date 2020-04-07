@@ -30,3 +30,21 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 end
+
+class MockClient
+  @@klass = {}
+
+  def initialize(endpoints_klass)
+    @klass = @@klass[endpoints_klass] ||= Class.new do
+      include endpoints_klass
+      attr_reader :request
+      def initialize(request)
+        @request = request
+      end
+    end
+  end
+
+  def call(request)
+    @klass.new(request)
+  end
+end
