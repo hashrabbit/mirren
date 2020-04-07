@@ -16,23 +16,15 @@ module Mirren
       Request.new(method: :delete, request: request).call(path: path)
     end
 
-    def validate_params(params, klass)
-      if params.is_a?(klass)
-        Monads::Success.new(params)
-      else
-        Monads::Failure.new(ParamsError.new(klass))
-      end
-    end
-
     def valid_params!(params, klass)
       return if params.is_a?(klass)
 
-      raise ParamsError.new(klass)
+      raise ArgumentError.new("Argument must be a #{klass}")
     end
 
     def request
-      raise NotImplementedError
       # RestClient::Request.execute
+      raise NotImplementedError
     end
   end
 end

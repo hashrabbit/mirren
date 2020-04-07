@@ -3,17 +3,6 @@ require 'spec_helper'
 module Mirren
   module Accounts
     RSpec.describe Endpoints do
-      endpoint_list = {
-        fetch_account: [],
-        fetch_account_balance: [],
-        fetch_pools: [],
-        fetch_pool: [{id: nil}],
-        create_pool: [{params: nil}],
-        delete_pool: [{id: nil}],
-        fetch_profiles: [{algo: nil}],
-        fetch_profile: [{id: nil}]
-      }
-
       let(:request) { double() }
       let(:client) { MockClient.new(Endpoints).call(request) }
       let(:response) { "{ \"success\": #{response_success?}, \"data\": #{response_data} }" }
@@ -23,32 +12,93 @@ module Mirren
       end
 
       # TODO: Does the rest_client::request#execute raise exceptions, or just return {success: false}?
-      context 'when the underlying request fails' do
-        let(:response_success?) { false }
-        let(:response_data) { "{\"message\": \"Request failed\"}" }
+      context 'when the underlying request returns without success' do
+        endpoint_list = {
+          fetch_account: {},
+          fetch_account_balance: {},
+          fetch_pools: {},
+          fetch_pool: {id: nil},
+          create_pool: {params: PoolParams.new(
+            type: 'sha256',
+            name: '***Test Pool***',
+            host: 'btc.pool.com',
+            port: 3333,
+            user: 'test-worker',
+            pass: 'x'
+          )},
+          delete_pool: {id: nil},
+          fetch_profiles: {algo: nil},
+          fetch_profile: {id: nil}
+        }
 
-        endpoint_list.each_pair do |method, args|
-          specify "#{method} returns a Failure of 'Bad request'" do
-              expect(client.send(method, *args)).to be_failure
-          end
+        context 'when the api response indicates a failed request' do
+          let(:response_success?) { false }
+          let(:response_data) { "{\"message\": \"Request failed\"}" }
 
-          specify "#{method}! raises an error of 'Bad request'" do
-              expect { client.send("#{method}!", *args) }.to raise_error
+          endpoint_list.each_pair do |method, kwargs|
+            specify "#{method} returns a Failure of ApiError" do
+              result = client.send(method, **kwargs)
+              expect(result).to be_failure
+              expect(result.flip.value!).to be_a ApiError
+            end
+
+            specify "#{method}! raises an ApiError" do
+              expect { client.send("#{method}!", **kwargs) }.to raise_error(ApiError)
+            end
           end
         end
-      end
 
-      context 'when the underlying request returns bad json' do
-        let(:response_success?) { true }
-        let(:response_data) { "bad json" }
+        context 'when the underlying request returns bad json' do
+          let(:response_success?) { true }
+          let(:response_data) { "bad json" }
 
-        endpoint_list.each_pair do |method, args|
-          specify "#{method} returns a Failure of 'Bad response'" do
-              expect(client.send(method, *args)).to be_failure
+          endpoint_list.each_pair do |method, kwargs|
+            specify "#{method} returns a Failure of JsonError" do
+              result = client.send(method, **kwargs)
+              expect(result).to be_failure
+              expect(result.flip.value!).to be_a JsonError
+            end
+
+            specify "#{method}! raises a JsonError" do
+              expect { client.send(:"#{method}!", **kwargs) }.to raise_error(JsonError)
+            end
+          end
+        end
+
+        context 'when the rest client throws an execption with a response code' do
+          before do
+            allow(request).to(receive(:call)).and_raise RestClient::ImATeapot
           end
 
-          specify "#{method}! raises an error of 'Bad response'" do
-              expect { client.send(:"#{method}!", *args) }.to raise_error
+          endpoint_list.each_pair do |method, kwargs|
+            specify "#{method} returns a Failure of ApiError" do
+              result = client.send(method, **kwargs)
+              expect(result).to be_failure
+              expect(result.flip.value!).to be_a ApiError
+            end
+
+            specify "#{method}! raises an ApiError" do
+              expect { client.send("#{method}!", **kwargs) }.to raise_error(ApiError)
+            end
+          end
+        end
+
+
+        context 'when the underlying request throws an error without a response code' do
+          before do
+            allow(request).to(receive(:call)).and_raise RestClient::Exception
+          end
+
+          endpoint_list.each_pair do |method, kwargs|
+            specify "#{method} returns a Failure of ClientError" do
+              result = client.send(method, **kwargs)
+              expect(result).to be_failure
+              expect(result.flip.value!).to be_an ClientError
+            end
+
+            specify "#{method}! raises a ClientError" do
+              expect { client.send("#{method}!", **kwargs) }.to raise_error(ClientError)
+            end
           end
         end
       end
@@ -228,7 +278,7 @@ module Mirren
           end
 
           describe '#create_pool(:params)' do
-            let(:params) {
+            let(:pool_params) {
               PoolParams.new(
                 type: 'sha256',
                 name: '***Test Pool***',
@@ -254,13 +304,13 @@ module Mirren
             end
 
             it 'create a new Pool resource, using supplied PoolParams' do
-              create_response = client.create_pool(params: params).value!
+              create_response = client.create_pool(params: pool_params).value!
               expect(create_response["id"].to_i).to eq 0
             end
 
             context 'when called with the raise helper' do
               it 'create a new Pool resource, using supplied PoolParams' do
-                create_response = client.create_pool!(params: params)
+                create_response = client.create_pool!(params: pool_params)
                 expect(create_response["id"].to_i).to eq 0
               end
             end

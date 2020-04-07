@@ -23,10 +23,12 @@ module Mirren
           Monads::Failure.new(ApiError.new(body['data']['message']))
         end
 
+      rescue RestClient::ExceptionWithResponse => e
+        Monads::Failure.new(ApiError.new(e))
       rescue RestClient::Exception => e
-        Monads::Failure.new(e)
+        Monads::Failure.new(ClientError.new(e))
       rescue JSON::ParserError => e
-        Monads::Failure.new(e)
+        Monads::Failure.new(JsonError.new(e))
       end
 
       def response

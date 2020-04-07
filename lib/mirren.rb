@@ -14,55 +14,62 @@ end
 module Monads
   include Dry::Monads[:result]
 
-  # @result_list_bind
+  # @traverse_results
   # Takes two arguments:
-  #   a result list, Success(Array(T)) | Failure(Err)
+  #   a result array, Success(Array(T)) | Failure(Err)
   #   a bind function, Fn(T) -> Success(U) | Failure(Err)
   # and returns:
-  #   a result list, Success(Array(U)) | Failure(Err)
-  # If bind returns Failure(Err) for any T in the list, we return Failure(Err)
-  # If bind returns Success(U) for all T in the list, we return Success(Array(U))
-  def self.result_list_bind(result_list_t, &bind)
-    result_list_t.bind do |success_list_t|
-      success_list_t.reduce(Monads::Success.new([])) do |result_list_u, t|
-        result_list_u.bind do |success_list_u|
+  #   a result array, Success(Array(U)) | Failure(Err)
+  # If bind returns Failure(Err) for any T in the array, we return Failure(Err)
+  # If bind returns Success(U) for all T in the array, we return Success(Array(U))
+  def self.traverse_results(result_array_t, &bind)
+    result_array_t.bind do |success_array_t|
+      success_array_t.reduce(Monads::Success.new([])) do |result_array_u, t|
+        result_array_u.bind do |success_array_u|
           bind.call(t).fmap do |success_u|
-            success_list_u << success_u
+            success_array_u << success_u
           end
         end
       end
     end
   end
+
+  def self.unwrap_result!(result)
+    case result
+      in Monads::Success(success)
+        success
+      in Monads::Success(*success_rest)
+        success_rest
+
+      in Monads::Failure(Exception => err)
+        raise err
+      in Monads::Failure(other)
+        raise Mirren::Error.new(other)
+      in Monads::Failure(*other_rest)
+        raise Mirren::Error.new(other_rest)
+    end
+  end
 end
 
 module Mirren
-  class MirrenError < StandardError
-    def self.unwrap!(result)
-      case result
-        in Monads::Success(success)
-        in Monads::Failure(MirrenError => e)
-          raise e
-        in Monads::Failure(other)
-          raise GenericError.new(other)
-      end
-    end
+  class Error < StandardError
   end
 
-  class GenericError < MirrenError
+  class JsonError < Error
     def initialize(value)
-      super("Error: #{value}")
+      super("Error handling JSON: #{value}")
     end
   end
 
-  class ApiError < MirrenError
+  class ClientError < Error
+    def initialize(value)
+      super("Client error: #{value}")
+    end
+  end
+
+  class ApiError < Error
     def initialize(message)
       super("API Error: #{message}")
-    end
-  end
-
-  class ParamsError < MirrenError
-    def initialize(klass)
-      super("Params Error: You must supply a #{klass} to this API method")
     end
   end
 

@@ -13,7 +13,7 @@ module Mirren
       end
 
       def fetch_account!
-        fetch_account.value!
+        Monads.unwrap_result!(fetch_account)
       end
 
       def fetch_account_balance
@@ -21,59 +21,59 @@ module Mirren
       end
 
       def fetch_account_balance!
-        fetch_account_balance.value!
+        Monads.unwrap_result!(fetch_account_balance)
       end
 
       def fetch_pools
-        result_list = get('/account/pool')
-        Monads.result_list_bind(result_list) { Pool.try(_1).to_monad }
+        result_array = get('/account/pool')
+        Monads.traverse_results(result_array) { Pool.try(_1).to_monad }
       end
 
       def fetch_pools!
-        fetch_pools.value!
+        Monads.unwrap_result!(fetch_pools)
       end
 
       def fetch_pool(id:)
         get("/account/pool/#{id}").bind { Pool.try(_1).to_monad }
       end
 
-      def fetch_pool!(*args)
-        fetch_pool(*args).value!
+      def fetch_pool!(kwargs)
+        Monads.unwrap_result!(fetch_pool(**kwargs))
       end
 
       def create_pool(params: nil)
-        validate_params(params, PoolParams).bind do |params|
-          put('/account/pool', params: params.to_h)
-        end
+        valid_params!(params, PoolParams)
+
+        put('/account/pool', params: params.to_h)
       end
 
-      def create_pool!(*args)
-        create_pool(*args).value!
+      def create_pool!(kwargs)
+        Monads.unwrap_result!(create_pool(**kwargs))
       end
 
       def delete_pool(id:)
         delete("/account/pool/#{id}")
       end
 
-      def delete_pool!(*args)
-        delete_pool(*args).value!
+      def delete_pool!(kwargs)
+        Monads.unwrap_result!(delete_pool(**kwargs))
       end
 
       def fetch_profiles(algo: nil)
-        result_list = get('/account/profile', params: { algo: algo })
-        Monads.result_list_bind(result_list) { Profile.try(_1).to_monad }
+        result_array = get('/account/profile', params: { algo: algo })
+        Monads.traverse_results(result_array) { Profile.try(_1).to_monad }
       end
 
-      def fetch_profiles!(*args)
-        fetch_profiles(*args).value!
+      def fetch_profiles!(kwargs)
+        Monads.unwrap_result!(fetch_profiles(**kwargs))
       end
 
       def fetch_profile(id:)
         get("/account/profile/#{id}").bind { Profile.try(_1).to_monad }
       end
 
-      def fetch_profile!(*args)
-        fetch_profile(*args).value!
+      def fetch_profile!(kwargs)
+        Monads.unwrap_result!(fetch_profile(**kwargs))
       end
     end
   end
