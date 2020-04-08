@@ -38,21 +38,124 @@ module Mirren
         }
       end
 
-      #let(:params) {
-      #  FoundParams.new(algo: 'sha256', history: true, limit: 1)
-      #}
-      # let(:found) { client.fetch_rentals(params: params) }
+      context 'when the underlying request succeeds' do
+        let(:response_success?) { true }
+        describe '#fetch_rentals(:params)' do
+          let(:params) {
+            FoundParams.new(algo: 'sha256', history: true, limit: 1)
+          }
+          let(:response_data) do
+            <<-JSON
+            {
+              "total": "3",
+              "returned": "2",
+              "start": "1",
+              "limit": "4",
+              "rentals": []
+            }
+            JSON
+          end
 
-      describe '#fetch_rentals(:params)' do
-        it 'filter my Rentals using FoundParams' do
-          expect(found.total).to be > 0
+          it 'filter my Rentals using FoundParams' do
+            found = client.fetch_rentals(params: params).value!
+            expect(found).to be_a Found
+          end
         end
-      end
 
-      describe '#fetch_rental(:id)' do
-        it 'returns details for the Rental specified by :id' do
-          rental = client.fetch_rental(id: found.rentals[0].id)
-          expect(rental.rig.type).to eq 'sha256'
+        describe '#fetch_rental(:id)' do
+          let(:params) {
+            FoundParams.new(algo: 'sha256', history: true, limit: 1)
+          }
+          let(:start_time) { Time.now }
+          let(:end_time) { Time.now }
+          let(:response_data) do
+            <<-JSON
+            {
+              "id": "7",
+              "owner": "rental_owner",
+              "renter": "rental_renter",
+              "hashrate": {
+                "advertised": {
+                  "hash": 1.0,
+                  "type": "hashrate_advertised_type",
+                  "nice": "hashrate_advertised_nice"
+                },
+                "average": {
+                  "hash": 4.0,
+                  "type": "hashrate_average_type",
+                  "nice": "hashrate_average_nice"
+                }
+              },
+              "price": {
+                "type": "price_type",
+                "advertised": "4.0",
+                "paid": "3.3",
+                "currency": "price_currency"
+              },
+              "price_converted": {
+                "type": "price_converted_type",
+                "advertised": "1.0",
+                "paid": "2.0",
+                "currency": "price_converted_currency"
+              },
+              "length": 7,
+              "extended": 5,
+              "start": "#{start_time}",
+              "end": "#{end_time}",
+              "rig": {
+                "id": "1",
+                "name": "rig_name",
+                "owner": "rig_owner",
+                "type": "rig_type",
+                "status": {
+                  "status": "rig_status",
+                  "hours": "24",
+                  "rented": true,
+                  "online": true
+                },
+                "online": true,
+                "xnonce": "yes",
+                "ndevices": 8,
+                "region": "rig_region",
+                "rpi": 4.5,
+                "suggested_diff": "100.0",
+                "optimal_diff": {
+                  "min": "50.0",
+                  "max": "500.0"
+                },
+                "poolstatus": "rig_poolstatus",
+                "extensions": true,
+                "price": {
+                  "type": "rig_price_type",
+                  "BTC": {
+                    "currency": "rig_price_BTC_currency",
+                    "price": "100.0",
+                    "hour": "12.0",
+                    "minhrs": "24.0",
+                    "maxhrs": "72.0",
+                    "enabled": true
+                  }
+                },
+                "minhours": "24",
+                "maxhours": "72",
+                "hashrate": {
+                  "advertised": {
+                    "hash": "100.0",
+                    "type": "rig_hashrate_advertised_type",
+                    "nice": "rig_hashrate_advertised_nice"
+                  }
+                },
+                "available_status": "rig_available_status",
+                "shorturl": "rig_shorturl"
+              }
+            }
+            JSON
+          end
+
+          it 'returns details for the Rental' do
+            rental = client.fetch_rental(id: '7').value!
+            expect(rental).to be_a Rental
+          end
         end
       end
     end
