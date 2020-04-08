@@ -13,24 +13,31 @@ module Mirren
       end
 
       def fetch_account!
-        Monads.unwrap_result!(fetch_account)
+        fetch_account
+          .extend(ResultExt)
+          .unwrap_result!
       end
 
       def fetch_account_balance
-        fields = get('/account/balance').bind { Balance.try(_1).to_monad }
+        get('/account/balance').bind { Balance.try(_1).to_monad }
       end
 
       def fetch_account_balance!
-        Monads.unwrap_result!(fetch_account_balance)
+        fetch_account_balance
+          .extend(ResultExt)
+          .unwrap_result!
       end
 
       def fetch_pools
-        result_array = get('/account/pool')
-        Monads.traverse_results(result_array) { Pool.try(_1).to_monad }
+        get('/account/pool')
+          .extend(ResultExt)
+          .traverse { Pool.try(_1).to_monad }
       end
 
       def fetch_pools!
-        Monads.unwrap_result!(fetch_pools)
+        fetch_pools
+          .extend(ResultExt)
+          .unwrap_result!
       end
 
       def fetch_pool(id:)
@@ -38,17 +45,20 @@ module Mirren
       end
 
       def fetch_pool!(kwargs)
-        Monads.unwrap_result!(fetch_pool(**kwargs))
+        fetch_pool(**kwargs)
+          .extend(ResultExt)
+          .unwrap_result!
       end
 
       def create_pool(params: nil)
         valid_params!(params, PoolParams)
-
         put('/account/pool', params: params.to_h)
       end
 
       def create_pool!(kwargs)
-        Monads.unwrap_result!(create_pool(**kwargs))
+        create_pool(**kwargs)
+          .extend(ResultExt)
+          .unwrap_result!
       end
 
       def delete_pool(id:)
@@ -56,16 +66,21 @@ module Mirren
       end
 
       def delete_pool!(kwargs)
-        Monads.unwrap_result!(delete_pool(**kwargs))
+        delete_pool(**kwargs)
+          .extend(ResultExt)
+          .unwrap_result!
       end
 
       def fetch_profiles(algo: nil)
-        result_array = get('/account/profile', params: { algo: algo })
-        Monads.traverse_results(result_array) { Profile.try(_1).to_monad }
+        get('/account/profile', params: { algo: algo })
+          .extend(ResultExt)
+          .traverse { Profile.try(_1).to_monad }
       end
 
       def fetch_profiles!(kwargs)
-        Monads.unwrap_result!(fetch_profiles(**kwargs))
+        fetch_profiles(**kwargs)
+          .extend(ResultExt)
+          .unwrap_result!
       end
 
       def fetch_profile(id:)
@@ -73,7 +88,9 @@ module Mirren
       end
 
       def fetch_profile!(kwargs)
-        Monads.unwrap_result!(fetch_profile(**kwargs))
+        fetch_profile(**kwargs)
+          .extend(ResultExt)
+          .unwrap_result!
       end
     end
   end

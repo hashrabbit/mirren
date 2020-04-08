@@ -4,6 +4,8 @@ require 'rest-client'
 module Mirren
   module Api
     class Request
+      include Dry::Monads[:result]
+
       attr_reader :method, :host, :path, :get_params, :post_params
 
       def initialize(method:, request:)
@@ -18,21 +20,21 @@ module Mirren
         @post_params = post_params
 
         if body['success']
-          Monads::Success.new(body['data'])
+          Success(body['data'])
         else
-          Monads::Failure.new(ApiError.new(body['data']['message']))
+          Failure(ApiError.new(body['data']['message']))
         end
 
       rescue RestClient::ExceptionWithResponse => e
-        Monads::Failure.new(ApiError.new(e))
+        Failure(ApiError.new(e))
       rescue RestClient::Exception => e
-        Monads::Failure.new(ClientError.new(e))
+        Failure(ClientError.new(e))
       rescue JSON::ParserError => e
-        Monads::Failure.new(JsonError.new(e))
+        Failure(JsonError.new(e))
       end
 
       def response
-        @response ||= @request.call(request_args)
+        @response ||= @request.(request_args)
       end
 
       def body
