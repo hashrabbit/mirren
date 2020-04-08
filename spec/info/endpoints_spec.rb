@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module Mirren
   module Info
-    RSpec.fdescribe Endpoints do
+    RSpec.describe Endpoints do
       let(:request) { double() }
       let(:client) { MockClient.new(Endpoints).call(request) }
       let(:response) { "{ \"success\": #{response_success?}, \"data\": #{response_data} }" }

@@ -8,24 +8,63 @@ module Mirren
       def fetch_rentals(params: nil)
         valid_params!(params, FoundParams)
 
-        fields = get('/rental', params: params.to_h)
-        Found.new(fields)
+        get('/rental', params: params.to_h).bind do |fields|
+          Found.try(fields)
+            .to_monad.extend(ResultExt)
+            .fmap_left { UnmarshalError.new(_1) }
+        end
+      end
+
+      def fetch_rentals!(kwargs)
+        fetch_rentals(**kwargs)
+          .extend(ResultExt)
+          .unwrap_result!
       end
 
       def fetch_rental(id:)
-        fields = get("/rental/#{id}")
-        Rental.new(fields)
+        get("/rental/#{id}").bind do |fields|
+          Rental.try(fields)
+            .to_monad.extend(ResultExt)
+            .fmap_left { UnmarshalError.new(_1) }
+        end
+      end
+
+      def fetch_rental!(kwargs)
+        fetch_rental(**kwargs)
+          .extend(ResultExt)
+          .unwrap_result!
       end
 
       def fetch_rental_pools(id:)
-        get("/rental/#{id}/pool")['pools'].map { |e| Pool.new(e) }
+        get("/rental/#{id}/pool").fmap { _1['pools'] }
+          .extend(ResultExt)
+          .traverse do |pool|
+            Pool.try(pool)
+              .to_monad.extend(ResultExt)
+              .fmap_left { UnmarshalError.new(_1) }
+          end
+      end
+
+      def fetch_rental_pools!(kwargs)
+        fetch_rental_pools(**kwargs)
+          .extend(ResultExt)
+          .unwrap_result!
       end
 
       def create_rental(params: nil)
         valid_params!(params, Params)
 
-        fields = put('/rental', params: params.to_h)
-        Rental.new(fields)
+        put('/rental', params: params.to_h).bind do |fields|
+          Rental.try(fields)
+            .to_monad.extend(ResultExt)
+            .fmap_left { UnmarshalError.new(_1) }
+        end
+      end
+
+      def create_rental!(kwargs)
+        create_rental(**kwargs)
+          .extend(ResultExt)
+          .unwrap_result!
       end
 
       def add_rental_pool(id:, params: nil)
@@ -34,8 +73,20 @@ module Mirren
         put("/rental/#{id}/pool", params: params.to_h)
       end
 
+      def add_rental_pool!(kwargs)
+        add_rental_pool(**kwargs)
+          .extend(ResultExt)
+          .unwrap_result!
+      end
+
       def delete_rental_pool(id:, priority:)
         delete("/rental/#{id}/pool/#{priority}")
+      end
+
+      def delete_rental_pool!(kwargs)
+        delete_rental_pool(**kwargs)
+          .extend(ResultExt)
+          .unwrap_result!
       end
     end
   end
