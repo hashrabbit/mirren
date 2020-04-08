@@ -19,13 +19,13 @@ module ResultExt
   # ResultExt#fmap_left
   # Takes two arguments:
   #   a result, Success(T) | Failure(U)
-  #   an fmap function, Fn(U) -> V
+  #   a map function, Fn(U) -> V
   # and returns:
   #   a result, Success(T) | Failure(V)
   # Works like fmap, but maps the Failure value to a new Failure value instead.
   # Success values are left unchanged
-  def fmap_left(&fmap)
-    self.or { |err| Failure(fmap(err)) }
+  def fmap_left(&map)
+    self.or { Failure(map.(_1)) }
   end
 
   # ResultExt#traverse

@@ -6,10 +6,12 @@ module Mirren
       include Api
 
       def fetch_account
-        get('/account').bind { |acct|
+        get('/account').bind do |acct|
           acct['settings'].tap { |h| h['two_factor'] = h.delete('2factor_auth') }
-          Account.try(acct).to_monad
-        }
+          Account.try(acct)
+            .to_monad.extend(ResultExt)
+            .fmap_left { UnmarshalError.new(_1) }
+        end
       end
 
       def fetch_account!
@@ -19,7 +21,11 @@ module Mirren
       end
 
       def fetch_account_balance
-        get('/account/balance').bind { Balance.try(_1).to_monad }
+        get('/account/balance').bind do |balance|
+          Balance.try(balance)
+            .to_monad.extend(ResultExt)
+            .fmap_left { UnmarshalError.new(_1) }
+        end
       end
 
       def fetch_account_balance!
@@ -31,7 +37,11 @@ module Mirren
       def fetch_pools
         get('/account/pool')
           .extend(ResultExt)
-          .traverse { Pool.try(_1).to_monad }
+          .traverse do |pool|
+            Pool.try(pool)
+              .to_monad.extend(ResultExt)
+              .fmap_left { UnmarshalError.new(_1) }
+          end
       end
 
       def fetch_pools!
@@ -41,7 +51,11 @@ module Mirren
       end
 
       def fetch_pool(id:)
-        get("/account/pool/#{id}").bind { Pool.try(_1).to_monad }
+        get("/account/pool/#{id}").bind do |pool|
+          Pool.try(pool)
+            .to_monad.extend(ResultExt)
+            .fmap_left { UnmarshalError.new(_1) }
+        end
       end
 
       def fetch_pool!(kwargs)
@@ -74,7 +88,11 @@ module Mirren
       def fetch_profiles(algo: nil)
         get('/account/profile', params: { algo: algo })
           .extend(ResultExt)
-          .traverse { Profile.try(_1).to_monad }
+          .traverse do |profile|
+            Profile.try(profile)
+              .to_monad.extend(ResultExt)
+              .fmap_left { UnmarshalError.new(_1) }
+          end
       end
 
       def fetch_profiles!(kwargs)
@@ -84,7 +102,11 @@ module Mirren
       end
 
       def fetch_profile(id:)
-        get("/account/profile/#{id}").bind { Profile.try(_1).to_monad }
+        get("/account/profile/#{id}").bind do |profile|
+          Profile.try(profile)
+            .to_monad.extend(ResultExt)
+            .fmap_left { UnmarshalError.new(_1) }
+        end
       end
 
       def fetch_profile!(kwargs)
