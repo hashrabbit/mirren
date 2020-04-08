@@ -7,10 +7,14 @@ module Mirren
 
       def fetch_account
         get('/account').bind do |acct|
-          acct['settings'].tap { |h| h['two_factor'] = h.delete('2factor_auth') }
+          acct['settings'].tap do |h|
+            h['two_factor'] = h.delete('2factor_auth')
+          end
+
           Account.try(acct)
-            .to_monad.extend(ResultExt)
-            .fmap_left { UnmarshalError.new(_1) }
+                 .to_monad
+                 .extend(ResultExt)
+                 .fmap_left { UnmarshalError.new(_1) }
         end
       end
 
@@ -23,8 +27,9 @@ module Mirren
       def fetch_account_balance
         get('/account/balance').bind do |balance|
           Balance.try(balance)
-            .to_monad.extend(ResultExt)
-            .fmap_left { UnmarshalError.new(_1) }
+                 .to_monad
+                 .extend(ResultExt)
+                 .fmap_left { UnmarshalError.new(_1) }
         end
       end
 
@@ -39,8 +44,9 @@ module Mirren
           .extend(ResultExt)
           .traverse do |pool|
             Pool.try(pool)
-              .to_monad.extend(ResultExt)
-              .fmap_left { UnmarshalError.new(_1) }
+                .to_monad
+                .extend(ResultExt)
+                .fmap_left { UnmarshalError.new(_1) }
           end
       end
 
@@ -53,8 +59,9 @@ module Mirren
       def fetch_pool(id:)
         get("/account/pool/#{id}").bind do |pool|
           Pool.try(pool)
-            .to_monad.extend(ResultExt)
-            .fmap_left { UnmarshalError.new(_1) }
+              .to_monad
+              .extend(ResultExt)
+              .fmap_left { UnmarshalError.new(_1) }
         end
       end
 
@@ -90,8 +97,9 @@ module Mirren
           .extend(ResultExt)
           .traverse do |profile|
             Profile.try(profile)
-              .to_monad.extend(ResultExt)
-              .fmap_left { UnmarshalError.new(_1) }
+                   .to_monad
+                   .extend(ResultExt)
+                   .fmap_left { UnmarshalError.new(_1) }
           end
       end
 
@@ -104,8 +112,9 @@ module Mirren
       def fetch_profile(id:)
         get("/account/profile/#{id}").bind do |profile|
           Profile.try(profile)
-            .to_monad.extend(ResultExt)
-            .fmap_left { UnmarshalError.new(_1) }
+                 .to_monad
+                 .extend(ResultExt)
+                 .fmap_left { UnmarshalError.new(_1) }
         end
       end
 

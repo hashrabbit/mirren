@@ -3,9 +3,12 @@ require 'spec_helper'
 module Mirren
   module Rigs
     RSpec.describe Endpoints do
-      let(:request) { double() }
+      let(:request) { double }
       let(:client) { MockClient.new(Endpoints).call(request) }
-      let(:response) { "{ \"success\": #{response_success?}, \"data\": #{response_data} }" }
+      let(:response) do
+        "{ \"success\": #{response_success?}," \
+        "  \"data\": #{response_data} }"
+      end
 
       before do
         allow(request).to receive(:call) { Struct.new(:body).new(response) }
@@ -13,24 +16,24 @@ module Mirren
 
       context 'when the underlying request returns without success' do
         include_context 'endpoint failures', {
-          fetch_rigs: {params: Params.new({
+          fetch_rigs: { params: Params.new(
             type: 'sha256ab',
             count: 10,
             rpi: { min: 100 }
-          })},
-          fetch_rig: {id: '3'}
+          ) },
+          fetch_rig: { id: '3' }
         }
       end
 
       context 'when the underlying request succeeds' do
         let(:response_success?) { true }
         describe '#fetch_rigs(:params)' do
-          let(:full_params) {
+          let(:full_params) do
             Params.new(
               type: 'sha256', count: 10, rpi: { min: 100 },
               minhours: { max: 24 }, hash: { min: 12, max: 16, type: 'th' }
             )
-          }
+          end
           let(:response_data) do
             <<-JSON
             {

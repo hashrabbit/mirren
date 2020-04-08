@@ -12,7 +12,7 @@ module Types
 end
 
 # ResultExt
-# Provides a helpful wrapper around Dry::Monad::Result objects for common operations
+# Provides a helpful method wrapper around Dry::Monad::Result objects
 module ResultExt
   include Dry::Monads[:result]
 
@@ -25,7 +25,7 @@ module ResultExt
   # Works like fmap, but maps the Failure value to a new Failure value instead.
   # Success values are left unchanged
   def fmap_left(&map)
-    self.or { Failure(map.(_1)) }
+    self.or { Failure(map.call(_1)) }
   end
 
   # ResultExt#traverse
@@ -35,12 +35,12 @@ module ResultExt
   # and returns:
   #   a result array, Success(Array(U)) | Failure(Err)
   # If bind returns Failure(Err) for any T in the array, we return Failure(Err)
-  # If bind returns Success(U) for all T in the array, we return Success(Array(U))
+  # If bind returns Success(U) for all T, we return Success(Array(U))
   def traverse(&bind)
     self.bind do |success_array_t|
       success_array_t.reduce(Success([])) do |result_array_u, t|
         result_array_u.bind do |success_array_u|
-          bind.(t).fmap do |success_u|
+          bind.call(t).fmap do |success_u|
             success_array_u << success_u
           end
         end
@@ -53,7 +53,7 @@ module ResultExt
   # If it's a Success, the successful value is returned
   # If it's a Failure, we match on the kind of Failure:
   #   If it's already an exception, we just raise it
-  #   If it's a value representing an error, we wrap it in an exception and raise it
+  #   If it's a value representing an error, we raise it in a wrapped exception
   def unwrap_result!
     case self
       in Success(success)
@@ -64,9 +64,9 @@ module ResultExt
       in Failure(Exception => err)
         raise err
       in Failure(other)
-        raise Mirren::Error.new(other)
+        raise Mirren::Error, other
       in Failure(*other_rest)
-        raise Mirren::Error.new(other_rest)
+        raise Mirren::Error, other_rest
     end
   end
 end

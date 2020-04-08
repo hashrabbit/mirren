@@ -6,7 +6,7 @@ module Mirren
     include Rentals::Endpoints
 
     def request
-      @request ||= ->(args) { RestClient::Request.execute(request_args) }
+      @request ||= ->(args) { RestClient::Request.execute(args) }
     end
   end
 end

@@ -15,16 +15,20 @@ end
 RSpec.shared_context 'endpoint failures' do |endpoint_list|
   context 'when the api response indicates a failed request' do
     let(:response_success?) { false }
-    let(:response_data) { "{\"message\": \"Request failed\"}" }
+    let(:response_data) { '{"message": "Request failed"}' }
 
-    it_behaves_like 'endpoints failing with error', endpoint_list, Mirren::ApiError
+    it_behaves_like 'endpoints failing with error',
+                    endpoint_list,
+                    Mirren::ApiError
   end
 
   context 'when the underlying request returns bad json' do
     let(:response_success?) { true }
     let(:response_data) { 'bad json' }
 
-    it_should_behave_like 'endpoints failing with error', endpoint_list, Mirren::JsonError
+    it_behaves_like 'endpoints failing with error',
+                    endpoint_list,
+                    Mirren::JsonError
   end
 
   context 'when the rest client throws an exception with a response code' do
@@ -32,14 +36,18 @@ RSpec.shared_context 'endpoint failures' do |endpoint_list|
       allow(request).to(receive(:call)).and_raise RestClient::ImATeapot
     end
 
-    it_should_behave_like 'endpoints failing with error', endpoint_list, Mirren::ApiError
+    it_behaves_like 'endpoints failing with error',
+                    endpoint_list,
+                    Mirren::ApiError
   end
 
-  context 'when the underlying request throws an error without a response code' do
+  context 'when the underlying request throws a bare exception' do
     before do
       allow(request).to(receive(:call)).and_raise RestClient::Exception
     end
 
-    it_should_behave_like 'endpoints failing with error', endpoint_list, Mirren::ClientError
+    it_behaves_like 'endpoints failing with error',
+                    endpoint_list,
+                    Mirren::ClientError
   end
 end

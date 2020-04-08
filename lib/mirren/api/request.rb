@@ -24,7 +24,6 @@ module Mirren
         else
           Failure(ApiError.new(body['data']['message']))
         end
-
       rescue RestClient::ExceptionWithResponse => e
         Failure(ApiError.new(e))
       rescue RestClient::Exception => e
@@ -34,7 +33,7 @@ module Mirren
       end
 
       def response
-        @response ||= @request.(request_args)
+        @response ||= @request.call(request_args)
       end
 
       def body

@@ -3,9 +3,12 @@ require 'spec_helper'
 module Mirren
   module Rentals
     RSpec.describe Endpoints do
-      let(:request) { double() }
+      let(:request) { double }
       let(:client) { MockClient.new(Endpoints).call(request) }
-      let(:response) { "{ \"success\": #{response_success?}, \"data\": #{response_data} }" }
+      let(:response) do
+        "{ \"success\": #{response_success?}," \
+        "  \"data\": #{response_data} }"
+      end
 
       before do
         allow(request).to receive(:call) { Struct.new(:body).new(response) }
@@ -13,37 +16,37 @@ module Mirren
 
       context 'when the underlying request returns without success' do
         include_context 'endpoint failures', {
-          fetch_rentals: {params: FoundParams.new({
+          fetch_rentals: { params: FoundParams.new(
             type: 'renter',
             algo: 'sha256',
             history: true,
             limit: 1
-          })},
-          fetch_rental: {id: '1'},
-          fetch_rental_pools: {id: '1'},
-          create_rental: {params: Params.new({
+          ) },
+          fetch_rental: { id: '1' },
+          fetch_rental_pools: { id: '1' },
+          create_rental: { params: Params.new(
             rig: 3,
             length: '7.0',
             profile: 9,
             currency: 'BTC'
-          })},
-          add_rental_pool: {id: '1', params: PoolParams.new({
+          ) },
+          add_rental_pool: { id: '1', params: PoolParams.new(
             priority: 3,
             host: 'host.domain',
             port: 3333,
             user: 'user',
             pass: 'pass'
-          })},
-          delete_rental_pool: {id: '1', priority: '3'}
+          ) },
+          delete_rental_pool: { id: '1', priority: '3' }
         }
       end
 
       context 'when the underlying request succeeds' do
         let(:response_success?) { true }
         describe '#fetch_rentals(:params)' do
-          let(:params) {
+          let(:params) do
             FoundParams.new(algo: 'sha256', history: true, limit: 1)
-          }
+          end
           let(:response_data) do
             <<-JSON
             {
@@ -63,9 +66,9 @@ module Mirren
         end
 
         describe '#fetch_rental(:id)' do
-          let(:params) {
+          let(:params) do
             FoundParams.new(algo: 'sha256', history: true, limit: 1)
-          }
+          end
           let(:start_time) { Time.now }
           let(:end_time) { Time.now }
           let(:response_data) do

@@ -10,8 +10,9 @@ module Mirren
 
         get('/rig', params: params.to_h).bind do |fields|
           Found.try(fields)
-            .to_monad.extend(ResultExt)
-            .fmap_left { UnmarshalError(_1) }
+               .to_monad
+               .extend(ResultExt)
+               .fmap_left { UnmarshalError(_1) }
         end
       end
 
@@ -24,8 +25,9 @@ module Mirren
       def fetch_rig(id:)
         get("/rig/#{id}").bind do |fields|
           Rig.try(fields)
-            .to_monad.extend(ResultExt)
-            .fmap_left { UnmarshalError(_1) }
+             .to_monad
+             .extend(ResultExt)
+             .fmap_left { UnmarshalError(_1) }
         end
       end
 

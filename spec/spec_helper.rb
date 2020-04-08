@@ -32,10 +32,10 @@ RSpec.configure do |config|
 end
 
 class MockClient
-  @@klass = {}
+  @@klasses = {}
 
   def initialize(endpoints_klass)
-    @klass = @@klass[endpoints_klass] ||= Class.new do
+    @klass = @@klasses[endpoints_klass] ||= Class.new do
       include endpoints_klass
       attr_reader :request
       def initialize(request)

@@ -3,9 +3,12 @@ require 'spec_helper'
 module Mirren
   module Info
     RSpec.describe Endpoints do
-      let(:request) { double() }
+      let(:request) { double }
       let(:client) { MockClient.new(Endpoints).call(request) }
-      let(:response) { "{ \"success\": #{response_success?}, \"data\": #{response_data} }" }
+      let(:response) do
+        "{ \"success\": #{response_success?}," \
+        "  \"data\": #{response_data} }"
+      end
       let(:name) { 'sha256' }
 
       before do
@@ -16,7 +19,7 @@ module Mirren
         include_context 'endpoint failures', {
           fetch_whoami: {},
           fetch_algos: {},
-          fetch_algo: {name: 'sha256'}
+          fetch_algo: { name: 'sha256' }
         }
       end
 

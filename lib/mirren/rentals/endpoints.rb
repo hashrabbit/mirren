@@ -10,8 +10,9 @@ module Mirren
 
         get('/rental', params: params.to_h).bind do |fields|
           Found.try(fields)
-            .to_monad.extend(ResultExt)
-            .fmap_left { UnmarshalError.new(_1) }
+               .to_monad
+               .extend(ResultExt)
+               .fmap_left { UnmarshalError.new(_1) }
         end
       end
 
@@ -24,8 +25,9 @@ module Mirren
       def fetch_rental(id:)
         get("/rental/#{id}").bind do |fields|
           Rental.try(fields)
-            .to_monad.extend(ResultExt)
-            .fmap_left { UnmarshalError.new(_1) }
+                .to_monad
+                .extend(ResultExt)
+                .fmap_left { UnmarshalError.new(_1) }
         end
       end
 
@@ -35,13 +37,17 @@ module Mirren
           .unwrap_result!
       end
 
+      #TODO: Change fmap to bind, with Success when 'pools' key is present,
+      #      and Failure(UnmarshalError) when 'pools' key is absent
       def fetch_rental_pools(id:)
-        get("/rental/#{id}/pool").fmap { _1['pools'] }
+        get("/rental/#{id}/pool")
+        .fmap { _1['pools'] }
           .extend(ResultExt)
           .traverse do |pool|
             Pool.try(pool)
-              .to_monad.extend(ResultExt)
-              .fmap_left { UnmarshalError.new(_1) }
+                .to_monad
+                .extend(ResultExt)
+                .fmap_left { UnmarshalError.new(_1) }
           end
       end
 
@@ -56,8 +62,9 @@ module Mirren
 
         put('/rental', params: params.to_h).bind do |fields|
           Rental.try(fields)
-            .to_monad.extend(ResultExt)
-            .fmap_left { UnmarshalError.new(_1) }
+                .to_monad
+                .extend(ResultExt)
+                .fmap_left { UnmarshalError.new(_1) }
         end
       end
 

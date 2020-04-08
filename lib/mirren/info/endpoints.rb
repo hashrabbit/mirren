@@ -8,8 +8,9 @@ module Mirren
       def fetch_whoami
         get('/whoami').bind do |whoami|
           Whoami.try(whoami)
-            .to_monad.extend(ResultExt)
-            .fmap_left { UnmarshalError.new(_1) }
+                .to_monad
+                .extend(ResultExt)
+                .fmap_left { UnmarshalError.new(_1) }
         end
       end
 
@@ -24,8 +25,9 @@ module Mirren
           .extend(ResultExt)
           .traverse do |algo|
             Algorithm.try(algo)
-              .to_monad.extend(ResultExt)
-              .fmap_left { UnmarshalError.new(_1) }
+                     .to_monad
+                     .extend(ResultExt)
+                     .fmap_left { UnmarshalError.new(_1) }
           end
       end
 
@@ -38,8 +40,9 @@ module Mirren
       def fetch_algo(name:)
         get("/info/algos/#{name}").bind do |algo|
           Algorithm.try(algo)
-            .to_monad.extend(ResultExt)
-            .fmap_left { UnmarshalError.new(_1) }
+                   .to_monad
+                   .extend(ResultExt)
+                   .fmap_left { UnmarshalError.new(_1) }
         end
       end
 

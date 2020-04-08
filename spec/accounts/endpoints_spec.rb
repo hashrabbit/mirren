@@ -3,9 +3,12 @@ require 'spec_helper'
 module Mirren
   module Accounts
     RSpec.describe Endpoints do
-      let(:request) { double() }
+      let(:request) { double }
       let(:client) { MockClient.new(Endpoints).call(request) }
-      let(:response) { "{ \"success\": #{response_success?}, \"data\": #{response_data} }" }
+      let(:response) do
+        "{ \"success\": #{response_success?}," \
+        "  \"data\": #{response_data} }"
+      end
 
       before do
         allow(request).to receive(:call) { Struct.new(:body).new(response) }
@@ -16,18 +19,18 @@ module Mirren
           fetch_account: {},
           fetch_account_balance: {},
           fetch_pools: {},
-          fetch_pool: {id: nil},
-          create_pool: {params: PoolParams.new(
+          fetch_pool: { id: nil },
+          create_pool: { params: PoolParams.new(
             type: 'sha256',
             name: '***Test Pool***',
             host: 'btc.pool.com',
             port: 3333,
             user: 'test-worker',
             pass: 'x'
-          )},
-          delete_pool: {id: nil},
-          fetch_profiles: {algo: nil},
-          fetch_profile: {id: nil}
+          ) },
+          delete_pool: { id: nil },
+          fetch_profiles: { algo: nil },
+          fetch_profile: { id: nil }
         }
       end
 
@@ -193,20 +196,20 @@ module Mirren
             end
 
             it 'returns details for the Pool specified by :id' do
-              pool = client.fetch_pool(id: "1").value!
+              pool = client.fetch_pool(id: '1').value!
               expect(pool).to be_a Pool
             end
 
             context 'when called with the raise helper' do
               it 'returns details for the Pool specified by :id' do
-                pool = client.fetch_pool!(id: "1")
+                pool = client.fetch_pool!(id: '1')
                 expect(pool).to be_a Pool
               end
             end
           end
 
           describe '#create_pool(:params)' do
-            let(:pool_params) {
+            let(:pool_params) do
               PoolParams.new(
                 type: 'sha256',
                 name: '***Test Pool***',
@@ -215,7 +218,8 @@ module Mirren
                 user: 'test-worker',
                 pass: 'x'
               )
-            }
+            end
+
             let(:response_data) do
               <<-JSON
                 {
@@ -233,19 +237,19 @@ module Mirren
 
             it 'create a new Pool resource, using supplied PoolParams' do
               create_response = client.create_pool(params: pool_params).value!
-              expect(create_response["id"].to_i).to eq 0
+              expect(create_response['id'].to_i).to eq 0
             end
 
             context 'when called with the raise helper' do
               it 'create a new Pool resource, using supplied PoolParams' do
                 create_response = client.create_pool!(params: pool_params)
-                expect(create_response["id"].to_i).to eq 0
+                expect(create_response['id'].to_i).to eq 0
               end
             end
           end
 
           describe '#delete_pool(:id)' do
-            let(:pool_id) { "3" }
+            let(:pool_id) { '3' }
             let(:response_data) do
               <<-JSON
                 {
@@ -257,13 +261,15 @@ module Mirren
 
             it 'removes a Pool resource, using supplied id' do
               delete_response = client.delete_pool(id: pool_id).value!
-              expect(delete_response).to include('id' => pool_id, 'message' => 'Deleted')
+              deleted_keys = { 'id' => pool_id, 'message' => 'Deleted' }
+              expect(delete_response).to include(deleted_keys)
             end
 
             context 'when called with the raise helper' do
               it 'removes a Pool resource, using supplied id' do
                 delete_response = client.delete_pool!(id: pool_id)
-                expect(delete_response).to include('id' => pool_id, 'message' => 'Deleted')
+                deleted_keys = { 'id' => pool_id, 'message' => 'Deleted' }
+                expect(delete_response).to include(deleted_keys)
               end
             end
           end
