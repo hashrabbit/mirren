@@ -48,3 +48,5 @@ class MockClient
     @klass.new(request)
   end
 end
+
+Dir['./spec/support/**/*.rb'].sort.each { require _1 }

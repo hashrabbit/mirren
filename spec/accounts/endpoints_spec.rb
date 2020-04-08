@@ -11,9 +11,8 @@ module Mirren
         allow(request).to receive(:call) { Struct.new(:body).new(response) }
       end
 
-      # TODO: Does the rest_client::request#execute raise exceptions, or just return {success: false}?
       context 'when the underlying request returns without success' do
-        endpoint_list = {
+        include_context 'endpoint failures', {
           fetch_account: {},
           fetch_account_balance: {},
           fetch_pools: {},
@@ -30,77 +29,6 @@ module Mirren
           fetch_profiles: {algo: nil},
           fetch_profile: {id: nil}
         }
-
-        context 'when the api response indicates a failed request' do
-          let(:response_success?) { false }
-          let(:response_data) { "{\"message\": \"Request failed\"}" }
-
-          endpoint_list.each_pair do |method, kwargs|
-            specify "#{method} returns a Failure of ApiError" do
-              result = client.send(method, **kwargs)
-              expect(result).to be_failure
-              expect(result.flip.value!).to be_a ApiError
-            end
-
-            specify "#{method}! raises an ApiError" do
-              expect { client.send("#{method}!", **kwargs) }.to raise_error(ApiError)
-            end
-          end
-        end
-
-        context 'when the underlying request returns bad json' do
-          let(:response_success?) { true }
-          let(:response_data) { "bad json" }
-
-          endpoint_list.each_pair do |method, kwargs|
-            specify "#{method} returns a Failure of JsonError" do
-              result = client.send(method, **kwargs)
-              expect(result).to be_failure
-              expect(result.flip.value!).to be_a JsonError
-            end
-
-            specify "#{method}! raises a JsonError" do
-              expect { client.send(:"#{method}!", **kwargs) }.to raise_error(JsonError)
-            end
-          end
-        end
-
-        context 'when the rest client throws an execption with a response code' do
-          before do
-            allow(request).to(receive(:call)).and_raise RestClient::ImATeapot
-          end
-
-          endpoint_list.each_pair do |method, kwargs|
-            specify "#{method} returns a Failure of ApiError" do
-              result = client.send(method, **kwargs)
-              expect(result).to be_failure
-              expect(result.flip.value!).to be_a ApiError
-            end
-
-            specify "#{method}! raises an ApiError" do
-              expect { client.send("#{method}!", **kwargs) }.to raise_error(ApiError)
-            end
-          end
-        end
-
-
-        context 'when the underlying request throws an error without a response code' do
-          before do
-            allow(request).to(receive(:call)).and_raise RestClient::Exception
-          end
-
-          endpoint_list.each_pair do |method, kwargs|
-            specify "#{method} returns a Failure of ClientError" do
-              result = client.send(method, **kwargs)
-              expect(result).to be_failure
-              expect(result.flip.value!).to be_an ClientError
-            end
-
-            specify "#{method}! raises a ClientError" do
-              expect { client.send("#{method}!", **kwargs) }.to raise_error(ClientError)
-            end
-          end
-        end
       end
 
       context 'when the underlying request succeeds' do
