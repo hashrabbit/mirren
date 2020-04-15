@@ -1,24 +1,14 @@
 module Mirren
   module Api
     class Header
-      def initialize(path)
-        @path = path
-        @key = ENV['API_KEY']
-      end
-
-      def call
+      def self.call(auth, path)
+        nonce = (Time.now.to_f * 1000).truncate
         {
           content_type: :json,
-          'x-api-key': @key,
+          'x-api-key': auth.api_key,
           'x-api-nonce': nonce,
-          'x-api-sign': Auth.new("#{@key}#{nonce}#{@path}").call
+          'x-api-sign': auth.call(nonce, path)
         }
-      end
-
-      private
-
-      def nonce
-        @nonce ||= (Time.now.to_f * 1000).truncate
       end
     end
   end
