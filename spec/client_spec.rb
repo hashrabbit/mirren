@@ -13,11 +13,8 @@ module Mirren
     end
 
     it 'fails to connect with invalid credentials', :skip => true do
-      orig_secret = ENV['API_SECRET']
-      ENV['API_SECRET'] = 'invalid'
-      client = Client.new
-      who = client.fetch_whoami
-      ENV['API_SECRET'] = orig_secret
+      client = Client.new(api_secret: 'invalid')
+      who = client.fetch_account_balance
       expect(who).not_to be_success
     end
   end
