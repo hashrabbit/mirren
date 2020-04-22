@@ -254,6 +254,7 @@ module Mirren
               <<-JSON
                 {
                   "id": "#{pool_id}",
+                  "success": true,
                   "message": "Deleted"
                 }
               JSON
@@ -261,14 +262,14 @@ module Mirren
 
             it 'removes a Pool resource, using supplied id' do
               delete_response = client.delete_pool(id: pool_id).value!
-              deleted_keys = { 'id' => pool_id, 'message' => 'Deleted' }
+              deleted_keys = { id: pool_id.to_i, message: 'Deleted' }
               expect(delete_response).to include(deleted_keys)
             end
 
             context 'when called with the raise helper' do
               it 'removes a Pool resource, using supplied id' do
                 delete_response = client.delete_pool!(id: pool_id)
-                deleted_keys = { 'id' => pool_id, 'message' => 'Deleted' }
+                deleted_keys = { id: pool_id.to_i, message: 'Deleted' }
                 expect(delete_response).to include(deleted_keys)
               end
             end
