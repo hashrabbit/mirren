@@ -1,6 +1,8 @@
+require 'dry-initializer'
 require 'dry-struct'
 require 'dry/monads'
 Dry::Types.load_extensions(:monads)
+require 'dry/monads/do'
 
 module Types
   include Dry.Types()
