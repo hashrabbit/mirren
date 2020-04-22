@@ -3,12 +3,10 @@ require 'openssl'
 module Mirren
   module Api
     class Auth
-      attr_reader :api_key, :api_secret
+      extend Dry::Initializer
 
-      def initialize(key, secret)
-        @api_key = key
-        @api_secret = secret
-      end
+      param :api_key
+      param :api_secret
 
       def call(nonce, path)
         OpenSSL::HMAC.hexdigest('sha1', api_secret, "#{api_key}#{nonce}#{path}")
