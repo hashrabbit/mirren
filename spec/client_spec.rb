@@ -16,14 +16,14 @@ module Mirren
       client = Client.new(api_secret: 'invalid')
       pools = client.fetch_pools
       expect(pools).not_to be_success
-      expect(pools.failure).to be_a(ApiError)
+      expect(pools.failure).to be_an(ApiError)
     end
 
     it 'fails to retrieve a resource with an invalid :id', :skip => true do
       client = Client.new
       pool = client.fetch_pool(id: 1)
       expect(pool).not_to be_success
-      expect(pool.failure).to be_a(ApiError)
+      expect(pool.failure).to be_an(ApiError)
     end
   end
 end
