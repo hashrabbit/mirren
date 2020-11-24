@@ -1,4 +1,5 @@
 require 'mirren/api/auth'
+require 'mirren/api/query_params'
 require 'mirren/api/header'
 require 'mirren/api/response'
 require 'mirren/api/request'
