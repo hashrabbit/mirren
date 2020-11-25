@@ -40,7 +40,8 @@ module Mirren
         {
           method: method,
           url: "#{host}#{path}",
-          headers: Header.call(auth, path).merge(params: get_params),
+          headers: Header.call(auth, path)
+                         .merge(params: QueryParams.call(get_params)),
           payload: post_params && post_params.to_json
         }.compact
       end
